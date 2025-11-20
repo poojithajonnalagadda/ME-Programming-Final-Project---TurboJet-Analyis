@@ -1,2 +1,6 @@
 # ME-Programming-Final-Project---TurboJet-Analyis
-brandon test
+This python tool can be used for analyzing turbojet cycle performance
+
+$$
+M = \frac{V}{\sqrt{\gamma R T}}
+$$
