@@ -53,12 +53,10 @@ class Engine:
 
 #Testing block
 if __name__ == "__main__":
-    inlet = InletConditions(p=100000, u=0)
-    diffuser = Diffuser(inlet)
-    compressor1 = Compressor(diffuser, pressure_ratio=3, eta=1.0)
-    compressor2 = Compressor(compressor1, pressure_ratio=2, eta=1.0)
+    inlet_condtions = InletConditions(p=101325, T=300, u=100)
 
-    print(inlet)
-    print(diffuser.get_outlet_conditions())
-    print(compressor1.get_outlet_conditions())
-    print(compressor2.get_outlet_conditions())
+    engine = Engine(inlet_condtions, pr=6, T04=2800, Qr=45e6, eta_d=1.0, eta_c=1.0, eta_b=1.0, eta_t=1.0, eta_n=1.0, mdot_air=50, Pa=101325)
+
+    solution = engine.solve()
+
+    print(solution)
