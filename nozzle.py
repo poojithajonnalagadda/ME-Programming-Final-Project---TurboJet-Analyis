@@ -11,18 +11,19 @@ class Nozzle:
         self.inlet = inlet_state
 
     def get_outlet_conditions(self, Pa):
-        P05 = self.inlet.P0
-        T05 = self.inlet.T0
+        P0_inlet = self.inlet.P0
+        T0_inlet = self.inlet.T0
         k = self.fluid.gamma
         cp = self.fluid.cp
         
         # Isentropic exit static temperature
-        Tes = T05 * (Pa / P05) ** ((k-1)/k)
+        Tes = T0_inlet * (Pa / P0_inlet) ** ((k-1)/k)
         
         #Real Exit Temperature
-        Te = T05 - self.eta * (T05 - Tes)
+        Te = T0_inlet - self.eta * (T0_inlet - Tes)
         
         #Exit Veolcity
-        ue = math.sqrt(2 * cp * (T05 - Te))
+        ue = math.sqrt(2 * cp * (T0_inlet - Te))
 
         return ue, Te
+
