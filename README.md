@@ -1,5 +1,7 @@
 # Turbojet and Afterburner Analysis
 
+This repository contains the code for a 1D turbojet analysis to find property changes over each component in order to find Thrust, Specific Impulse (Isp), Thrust Specific Fuel Consumption (TSFC), and Exit Velocity. This project will ultilize Object-Oriented Programming Structure to make each component modular to allow for analysis on an arbitrary number of nodes (e.g compressor nodes, turbine nodes). There is also a GUI Interface to allow for user inputs and plots are generated to provide for a better visual.
+
 ## Assumptions
 - Adiabatic flow (not necessarily isentropic)  
 - Steady, quasi-1-dimensional  
@@ -10,7 +12,7 @@
 
 Given , R, Ta we can find the speed of sound as  
 $$
-a=RTa
+a=\gammaRTa
 $$
 
 With the speed of sound defined, we can find the Mach No. of the incoming air into the inlet of the turbojet as  
