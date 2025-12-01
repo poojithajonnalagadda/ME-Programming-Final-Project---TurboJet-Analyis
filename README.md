@@ -21,21 +21,21 @@ Given `γ`, `R`, and `Ta`, the speed of sound is:
 
 $$ a = \sqrt{\gamma R T_a} $$
 
-The Mach number of incoming air:
+With the speed of sound defined, we can find the Mach No. of the incoming air into the inlet of the turbojet as:
 
 $$ M_a = \frac{u}{a} $$
 
-where `u` is the freestream velocity.
+where `u` is the freestream velocity or in other words the velocity of the incoming air into the turbojet.
 
 Stagnation temperature at inlet:
 
 $$ T_{01} = T_a \left(1 + \frac{\gamma - 1}{2} M_a^2\right) $$
 
-For an adiabatic diffuser:
+Because our diffuser is assumed to be adiabatic, the stagnation temperature at the outlet of the diffuser/inlet of the compressor is:
 
 $$ T_{02} = T_{01} $$
 
-Using isentropic relations:
+We can find the stagnation temperature of the incoming air as:
 
 $$ \frac{P_{02}}{P_a} = \left(\frac{T_{02s}}{T_a}\right)^{\frac{\gamma}{\gamma-1}} $$
 
@@ -49,12 +49,12 @@ Thus:
 
 $$ T_{02s} = \eta_d(T_{02} - T_a) + T_a $$
 
-Finally:
+Using isentropic relations, we can relate the temperature ratio through the diffuser to the pressure ratio through the diffuser as:
 
 $$ P_{02} = P_a \left(\frac{T_{02s}}{T_a}\right)^{\frac{\gamma}{\gamma-1}} $$
 
 ### Compressor
-Given compressor pressure ratio `π_c`:
+Given compressor pressure ratio `π_c` we can find the stagnation pressure at the outlet of the compressor (P03) as:
 
 $$ P_{03} = \pi_c P_{02} $$
 
@@ -66,18 +66,18 @@ Thus:
 
 $$ T_{03} = T_{02} + \frac{1}{\eta_c}(T_{03s} - T_{02}) $$
 
-Using isentropic relations:
+Using isentropic relations, we can relate the temperature ratio through the diffuser to the pressure ratio through the diffuser as, which leads to T03s being equal to the following. T03s is the stagnation temperature at the outlet of the compressor if the compressor were isentropic.
 
 $$ T_{03s} = T_{02} \left(\frac{P_{03}}{P_{02}}\right)^{\frac{\gamma-1}{\gamma}} $$
 
 ### Combustor
-Assuming isobaric combustion:
+Assuming isobaric combustion, which is typical for jet turbines:
 
 $$ P_{04} = P_{03} $$
 
-Outlet temperature `T_{04}` is a design parameter.
+Outlet temperature `T_{04}`, which is the outlet of the combustor/inlet to the turbine, is a design parameter. This design parameter represents the maximum temperature that the turbine blade material can handle.
 
-Burner efficiency `η_b`:
+The Adiabatic Burner efficiency is given as `η_b`:
 
 $$ \eta_b = \frac{\dot{m}_{total}(h_{04} - h_{03})}{\dot{m}_f Q_R} $$
 
@@ -100,14 +100,16 @@ Turbine efficiency `η_t`:
 
 $$ \eta_t = \frac{h_{04} - h_{05}}{h_{04} - h_{05s}} = \frac{T_{04} - T_{05}}{T_{04} - T_{05s}} $$
 
+The above implies that
+
 $$ T_{05s} = T_{04} - \frac{1}{\eta_t}(T_{04} - T_{05}) $$
 
-Pressure ratio:
+Using isentropic relations, we can relate the temperature ratio across the turbine to the pressure ratio across the turbine as, where T05s is the stagnation temperature at the outlet of the turbine if the turbine were isentropic.:
 
 $$ \frac{P_{05}}{P_{04}} = \left(\frac{T_{05s}}{T_{04}}\right)^{\frac{\gamma}{\gamma-1}} $$
 
 ### Nozzle
-For an adiabatic nozzle:
+Because our nozzle is assumed to be adiabatic, the stagnation temperature at the nozzle exit is:
 
 $$ T_{0e} = T_{05} $$
 
@@ -129,11 +131,11 @@ $$ T_{es} = T_{05} \left(\frac{P_e}{P_{05}}\right)^{\frac{\gamma-1}{\gamma}} $$
 $$ T = \dot{m}_a(1+f)u_e - \dot{m}_a u $$
 
 ## Afterburner Analysis
-Assuming isobaric combustion:
+Assuming isobaric combustion in the afterburner, just like we have in the combustor, which is typical of jet turbines:
 
 $$ P_{06} = P_{05} $$
 
-Maximum afterburner temperature `T_{06}` is a user-provided design limit:
+Maximum afterburner temperature `T_{06}` is a user-provided design limit, which represents the max temperature that the walls of the afterburner can withstand:
 
 $$ T_{06} = T_{\text{max,ab}} $$
 
@@ -164,12 +166,6 @@ $$ T = \dot{m}_a(1+f+f_{ab})u_e - \dot{m}_a u $$
 $$ \dot{m}_f = \dot{m}_a (f + f_{ab}) $$
 
 $$ TSFC = \frac{\dot{m}_f}{T} $$
-
-## Usage
-1. Run the GUI interface
-2. Input component parameters (efficiencies, pressure ratios, temperatures)
-3. View calculated performance metrics
-4. Analyze generated plots for component behavior
 
 ## Packages Used
 - CoolProp
