@@ -7,7 +7,7 @@ def plot_engine_results(results, inlet_cond):
     """
     Plot pressure and temperature at each station, plus T-S diagram
     """
-    stations = ['Inlet', 'Station 02', 'Station 03', 'Station 04', 'Station 05', 'Exit']
+    stations = ['Diffuser Inlet', 'Compressor Inlet', 'Combustor Inlet', 'Turbine Inlet', 'Nozzle Inlet', 'Exit']
     
     # Extract pressure and temperature data
     pressures = np.array([
@@ -42,7 +42,7 @@ def plot_engine_results(results, inlet_cond):
     
     ax1_twin = ax1.twinx()
     
-    line1 = ax1.plot(x_pos, pressures, 'o-', color='#2E86AB', linewidth=2, 
+    line1 = ax1.plot(x_pos, pressures / 1000, 'o-', color='#2E86AB', linewidth=2, 
                      markersize=8, label='Pressure')
     ax1.set_xlabel('Station', fontsize=11)
     ax1.set_ylabel('Pressure (kPa)', color='#2E86AB', fontsize=11)
@@ -66,11 +66,11 @@ def plot_engine_results(results, inlet_cond):
     valid_T = [T for s, T in zip(entropies, temperatures) if s is not None]
     
     if len(valid_s) > 0:
-        ax2.plot(valid_s, valid_T, 'o-', color='#F77F00', linewidth=2, markersize=8)
+        ax2.plot(valid_s, valid_T, 'o--', color='#F77F00', linewidth=2, markersize=8)
         
         # Add station labels
         station_labels = ['0', '02', '03', '04', '05', 'e']
-        for i, (s, T, label) in enumerate(zip(valid_s, valid_T, station_labels)):
+        for s, T, label in zip(valid_s, valid_T, station_labels):
             ax2.annotate(label, (s, T), xytext=(5, 5), textcoords='offset points',
                         fontsize=9, bbox=dict(boxstyle='round,pad=0.3', 
                         facecolor='yellow', alpha=0.3))
@@ -81,23 +81,18 @@ def plot_engine_results(results, inlet_cond):
         s_plot = np.linspace(s_min - 0.1*s_range, s_max + 0.1*s_range, 100)
         
         # Draw isobars for key pressure levels
-        pressure_levels = [100, 200, 500, 1000, 1500]  # kPa
-        for p_kpa in pressure_levels:
-            T_isobar = []
-            s_isobar = []
-            for s_val in s_plot:
-                try:
-                    T_val = PropsSI('T', 'S', s_val, 'P', p_kpa * 1000, 'Air')
-                    if 250 < T_val < 2000:
-                        T_isobar.append(T_val)
-                        s_isobar.append(s_val)
-                except:
-                    continue
+        pressure_levels = [inlet_cond.p, results["T03"].P0]  # [Pa]
+
+        delta_s = entropies - s0
+
+        for p in pressure_levels:
+            delta_s = s_plot - s0
+            T_isobar = inlet_cond.T * np.exp((delta_s + air.R * np.log(p / inlet_cond.p)) / air.cp)
             
             if len(T_isobar) > 2:
-                ax2.plot(s_isobar, T_isobar, '--', color='gray', alpha=0.4, linewidth=0.8)
+                ax2.plot(s_plot, T_isobar, '--', color='gray', alpha=0.4, linewidth=0.8)
                 if len(T_isobar) > 0:
-                    ax2.text(s_isobar[-1], T_isobar[-1], f'{p_kpa}', 
+                    ax2.text(s_plot[-1], T_isobar[-1], f'{p / 1000:0.0f} kPa', 
                             fontsize=7, color='gray', alpha=0.6)
         
         ax2.set_xlabel('Specific Entropy (J/kg·K)', fontsize=11)
@@ -120,9 +115,9 @@ if __name__ == "__main__":
         Qr=43e6,
         eta_d=1.0,
         eta_c=1.0,
-        eta_b=1.0,
-        eta_t=1.0,
-        eta_n=1.0,
+        eta_b=0.95,
+        eta_t=0.95,
+        eta_n=0.95,
         mdot_air=50,
         Pa=101325
     )
