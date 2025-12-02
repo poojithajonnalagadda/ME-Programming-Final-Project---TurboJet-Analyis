@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 from CoolProp.CoolProp import PropsSI
 import numpy as np
+from node import Fluid
 
 def plot_engine_results(results, inlet_cond):
     """
@@ -9,33 +10,31 @@ def plot_engine_results(results, inlet_cond):
     stations = ['Inlet', 'Station 02', 'Station 03', 'Station 04', 'Station 05', 'Exit']
     
     # Extract pressure and temperature data
-    pressures = [
-        inlet_cond.p / 1000,
-        results['T02'].P0 / 1000,
-        results['T03'].P0 / 1000,
-        results['T04'].P0 / 1000,
-        results['T05'].P0 / 1000,
-        inlet_cond.p / 1000
-    ]
+    pressures = np.array([
+        inlet_cond.p,
+        results['T02'].P0,
+        results['T03'].P0,
+        results['T04'].P0,
+        results['T05'].P0,
+        inlet_cond.p
+    ])
     
-    temperatures = [
+    temperatures = np.array([
         inlet_cond.T,
         results['T02'].T0,
         results['T03'].T0,
         results['T04'].T0,
         results['T05'].T0,
         results['Te']
-    ]
-    
-    # Calculate entropy at each station using CoolProp
-    entropies = []
-    for P, T in zip([p * 1000 for p in pressures], temperatures):
-        try:
-            s = PropsSI('S', 'P', P, 'T', T, 'Air')
-            entropies.append(s)
-        except:
-            entropies.append(None)
-    
+    ])
+
+    # Baseline entropy and properties of air
+    s0 = PropsSI("S", "P", inlet_cond.p, "T", inlet_cond.T, "Air")
+    air = Fluid(gamma=1.4, R=287)
+
+    # Compute specific entropies at each station, assuming calorically perfect
+    entropies = air.cp * np.log(temperatures / inlet_cond.T) - air.R * np.log(pressures / inlet_cond.p) + s0
+
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
     
     # Plot 1: Pressure and Temperature vs Station
@@ -119,11 +118,11 @@ if __name__ == "__main__":
         pr=10.0,
         T04=1400,
         Qr=43e6,
-        eta_d=0.95,
-        eta_c=0.85,
-        eta_b=0.98,
-        eta_t=0.88,
-        eta_n=0.95,
+        eta_d=1.0,
+        eta_c=1.0,
+        eta_b=1.0,
+        eta_t=1.0,
+        eta_n=1.0,
         mdot_air=50,
         Pa=101325
     )
