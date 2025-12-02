@@ -1,7 +1,7 @@
 import sys
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, 
                              QHBoxLayout, QLabel, QLineEdit, QPushButton, 
-                             QTextEdit, QGroupBox, QGridLayout)
+                             QTextEdit, QGroupBox, QGridLayout, QComboBox)
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 
 from engine import Engine
@@ -47,10 +47,16 @@ class EngineGUI(QMainWindow):
             input_layout.addWidget(lbl, i, 0)
             input_layout.addWidget(edit, i, 1)
             self.inputs[key] = edit
+
+        # Plot Settings
+        self.plot_type = QComboBox()
+        self.plot_type.addItems(["TS", "P and T vs Station"])
         
+        input_layout.addWidget(self.plot_type)
+
         input_group.setLayout(input_layout)
         left_panel.addWidget(input_group)
-        
+
         # Calculate button
         self.calc_button = QPushButton("Calculate")
         self.calc_button.clicked.connect(self.calculate)
@@ -143,7 +149,7 @@ class EngineGUI(QMainWindow):
                 self.plot_layout.removeWidget(self.canvas)
                 self.canvas.deleteLater()
             
-            fig = plot_engine_results(results, inlet)
+            fig = plot_engine_results(results, inlet, plot_type=self.plot_type.currentText())
             self.canvas = FigureCanvas(fig)
             self.plot_layout.addWidget(self.canvas)
             
