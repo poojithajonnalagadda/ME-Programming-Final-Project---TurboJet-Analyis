@@ -21,7 +21,7 @@ class Engine:
             eta_ab = kwargs['eta_ab']
             Qr_ab = kwargs['Qr_ab']
             T06 = kwargs['T06']
-            self.afterburn = Afterburner(self.turb, eta_ab = eta_ab, Qr_ab = Qr_ab, T06 = T06)
+            self.afterburn = Combustor(self.turb, T04 = T06, Qr = Qr_ab, eta_b = eta_ab)
             self.nozz = Nozzle(eta_n = eta_n, fluid = self.afterburn.fluid)
         else:
             self.afterburn = None
@@ -43,8 +43,8 @@ class Engine:
         #Afterburner
         if self.afterburner_included and self.afterburn is not None:
             stage06 = self.afterburn.get_outlet_conditions()
-            f_ab = self.afterburn.f_ab
-            f_tot = self.afterburn.f_tot
+            f_ab = self.afterburn.f
+            f_tot = f + f_ab
             self.nozz.set_inlet(stage06)
             afterburner_station = stage06
         else:
@@ -86,10 +86,25 @@ class Engine:
 
 #Testing block
 if __name__ == "__main__":
-    inlet_condtions = InletConditions(p=101325, T=300, u=100)
+    inlet_condtions = InletConditions(p=101325, T=288, u=250)
 
-    engine = Engine(inlet_condtions, pr=6, T04=2800, Qr=45e6, eta_d=1.0, eta_c=1.0, eta_b=1.0, eta_t=1.0, eta_n=1.0, mdot_air=50, Pa=101325)
-
+    engine = Engine(
+        inlet_condtions,
+        pr=8.3,
+        T04=1250,
+        Qr=43e6,
+        eta_d=0.95,
+        eta_c=0.82,
+        eta_b=0.98,
+        eta_t=0.88,
+        eta_n=0.97,
+        mdot_air=20,
+        Pa=101325,
+        # afterburner_included=True,
+        # eta_ab=0.95,
+        # Qr_ab=43e6,
+        # T06=2000,
+    )
     solution = engine.solve()
 
     print(solution)
