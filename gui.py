@@ -48,11 +48,14 @@ class EngineGUI(QMainWindow):
             input_layout.addWidget(edit, i, 1)
             self.inputs[key] = edit
 
+        N_float_inputs = len(params)
+
         # Plot Settings
         self.plot_type = QComboBox()
-        self.plot_type.addItems(["TS", "P and T vs Station"])
+        self.plot_type.addItems(["TS Diagram", "Station Diagram"])
         
-        input_layout.addWidget(self.plot_type)
+        input_layout.addWidget(QLabel("Plot Type"), N_float_inputs, 0)
+        input_layout.addWidget(self.plot_type, N_float_inputs, 1)
 
         input_group.setLayout(input_layout)
         left_panel.addWidget(input_group)
@@ -61,6 +64,13 @@ class EngineGUI(QMainWindow):
         self.calc_button = QPushButton("Calculate")
         self.calc_button.clicked.connect(self.calculate)
         left_panel.addWidget(self.calc_button)
+
+        self.results_list = []
+
+        # Clear Button
+        self.clear_button = QPushButton("Clear Plot")
+        self.clear_button.clicked.connect(self.clear)
+        left_panel.addWidget(self.clear_button)
         
         # Results display
         result_group = QGroupBox("Results")
@@ -89,6 +99,9 @@ class EngineGUI(QMainWindow):
         right_widget.setLayout(right_panel)
         layout.addWidget(right_widget)
         
+    def clear(self):
+        self.results_list = []
+
     def calculate(self):
         try:
             # Parse inputs
@@ -122,6 +135,7 @@ class EngineGUI(QMainWindow):
             )
             
             results = engine.solve()
+            self.results_list.append(results)
             
             # Display results
             output = "=" * 50 + "\n"
@@ -139,7 +153,7 @@ class EngineGUI(QMainWindow):
             output += f"  Fuel-Air Ratio: {results['f']:.6f}\n"
             output += f"  Fuel Flow Rate: {results['f']*mdot_air:.4f} kg/s\n"
             output += f"  Thrust: {results['Thrust']/1000:.2f} kN\n"
-            output += f"  TSFC: {results['TSFC']*1000:.4f} mg/(N·s)\n"
+            output += f"  TSFC: {results['TSFC']*1000:.4f} (mg/s)/N\n"
             output += f"  Specific Impulse: {results['Isp']:.2f} s\n"
             
             self.result_text.setText(output)
@@ -149,7 +163,7 @@ class EngineGUI(QMainWindow):
                 self.plot_layout.removeWidget(self.canvas)
                 self.canvas.deleteLater()
             
-            fig = plot_engine_results(results, inlet, plot_type=self.plot_type.currentText())
+            fig = plot_engine_results(self.results_list, inlet, plot_type=self.plot_type.currentText())
             self.canvas = FigureCanvas(fig)
             self.plot_layout.addWidget(self.canvas)
             
