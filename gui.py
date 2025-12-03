@@ -139,6 +139,7 @@ class EngineGUI(QMainWindow):
 
     def clear(self):
         self.results_list = []
+        self.update_plots()
 
     def afterburner_toggled(self, checked):
         if checked:
@@ -167,10 +168,10 @@ class EngineGUI(QMainWindow):
             Qr_ab = float(self.inputs["Qr_ab"].text())
 
             # Create engine and solve
-            inlet = InletConditions(p=p, T=T, u=u)
+            self.inlet = InletConditions(p=p, T=T, u=u)
             if self.afterburner_toggle.text() == "OFF":
                 engine = Engine(
-                    inlet_cond=inlet,
+                    inlet_cond=self.inlet,
                     pr=pr,
                     T04=T04,
                     Qr=Qr,
@@ -183,7 +184,7 @@ class EngineGUI(QMainWindow):
                 )
             else:
                 engine = Engine(
-                    inlet_cond=inlet,
+                    inlet_cond=self.inlet,
                     pr=pr,
                     T04=T04,
                     Qr=Qr,
@@ -225,20 +226,22 @@ class EngineGUI(QMainWindow):
 
             self.result_text.setText(output)
 
-            # Update plots
-            if self.canvas:
-                self.plot_layout.removeWidget(self.canvas)
-                self.canvas.deleteLater()
-
-            fig = plot_engine_results(
-                self.results_list, inlet, plot_type=self.plot_type.currentText()
-            )
-            self.canvas = FigureCanvas(fig)
-            self.plot_layout.addWidget(self.canvas)
+            self.update_plots()
 
         except Exception as e:
             self.result_text.setText(f"Error: {str(e)}")
 
+    def update_plots(self):
+        # Update plots
+        if self.canvas:
+            self.plot_layout.removeWidget(self.canvas)
+            self.canvas.deleteLater()
+
+        fig = plot_engine_results(
+            self.results_list, self.inlet, plot_type=self.plot_type.currentText()
+        )
+        self.canvas = FigureCanvas(fig)
+        self.plot_layout.addWidget(self.canvas)
 
 def main():
     app = QApplication(sys.argv)
