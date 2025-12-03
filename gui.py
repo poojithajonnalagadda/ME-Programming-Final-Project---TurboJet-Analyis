@@ -113,7 +113,7 @@ class EngineGUI(QMainWindow):
         self.results_list = []
 
         # Clear Button
-        self.clear_button = QPushButton("Clear Plot")
+        self.clear_button = QPushButton("Clear Results")
         self.clear_button.clicked.connect(self.clear)
         left_panel.addWidget(self.clear_button)
 

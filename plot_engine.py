@@ -1,6 +1,4 @@
 import matplotlib.pyplot as plt
-import matplotlib.colors as mcolors
-from random import choice
 from CoolProp.CoolProp import PropsSI
 import numpy as np
 from node import Fluid
@@ -15,8 +13,7 @@ def plot_engine_results(results_list: list[dict], inlet_cond, plot_type):
     ax_twin = ax_station.twinx()
 
     for results in results_list:
-        color_names = list(mcolors.TABLEAU_COLORS.keys())
-        color = choice(color_names)
+        color = results["color"]
 
         stations = ["Inlet", "Station 02", "Station 03", "Station 04", "Station 05"]
         station_labels = ["0", "02", "03", "04", "05"]
@@ -70,15 +67,15 @@ def plot_engine_results(results_list: list[dict], inlet_cond, plot_type):
         line1 = ax_station.plot(
             x_pos,
             pressures / 1000,
-            "o-",
+            "o-.",
             color=color,
             linewidth=2,
             markersize=8,
             label="Pressure",
         )
         ax_station.set_xlabel("Station", fontsize=11)
-        ax_station.set_ylabel("Pressure (kPa)", color=color, fontsize=11)
-        ax_station.tick_params(axis="y", labelcolor=color)
+        ax_station.set_ylabel("Pressure (kPa)", fontsize=11)
+        ax_station.tick_params(axis="y")
         ax_station.set_xticks(x_pos)
         ax_station.set_xticklabels(stations, rotation=45, ha="right")
         ax_station.grid(True, alpha=0.3)
@@ -92,8 +89,8 @@ def plot_engine_results(results_list: list[dict], inlet_cond, plot_type):
             markersize=8,
             label="Temperature",
         )
-        ax_twin.set_ylabel("Temperature (K)", color=color, fontsize=11)
-        ax_twin.tick_params(axis="y", labelcolor=color)
+        ax_twin.set_ylabel("Temperature (K)", fontsize=11)
+        ax_twin.tick_params(axis="y")
 
         lines = line1 + line2
         labels = [l.get_label() for l in lines]
