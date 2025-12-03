@@ -10,6 +10,7 @@ def plot_engine_results(results_list: list[dict], inlet_cond, plot_type):
     """
     fig_station, ax_station = plt.subplots(1, 1, figsize=(14, 6))
     fig_TS, ax_TS = plt.subplots(1, 1, figsize=(14, 6))
+    ax_twin = ax_station.twinx()
 
     for results in results_list:
         stations = ["Inlet", "Station 02", "Station 03", "Station 04", "Station 05"]
@@ -61,8 +62,6 @@ def plot_engine_results(results_list: list[dict], inlet_cond, plot_type):
         # Plot 1: Pressure and Temperature vs Station
 
         x_pos = range(len(stations))
-
-        ax_twin = ax_station.twinx()
 
         line1 = ax_station.plot(
             x_pos,
@@ -122,8 +121,7 @@ def plot_engine_results(results_list: list[dict], inlet_cond, plot_type):
 
             # Add isobar lines
             s_min, s_max = min(valid_s), max(valid_s)
-            s_range = s_max - s_min
-            s_plot = np.linspace(s_min - 0.1 * s_range, s_max + 0.1 * s_range, 100)
+            s_plot = np.linspace(s_min, s_max, 100)
 
             # Draw isobars for key pressure levels
             pressure_levels = [
