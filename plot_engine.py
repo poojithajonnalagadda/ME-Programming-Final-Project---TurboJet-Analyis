@@ -11,8 +11,10 @@ def plot_engine_results(results_list: list[dict], inlet_cond, plot_type):
     fig_station, ax_station = plt.subplots(1, 1, figsize=(14, 6))
     fig_TS, ax_TS = plt.subplots(1, 1, figsize=(14, 6))
     ax_twin = ax_station.twinx()
+    fig_performance, ax_performance = plt.subplots(1, 2, figsize=(14,6))
 
-    for results in results_list:
+
+    for i, results in enumerate(results_list):
         color = results["color"]
 
         stations = ["Inlet", "Station 02", "Station 03", "Station 04", "Station 05"]
@@ -160,7 +162,22 @@ def plot_engine_results(results_list: list[dict], inlet_cond, plot_type):
 
         plt.tight_layout()
 
-    figs = {"TS Diagram": fig_TS, "Station Diagram": fig_station}
+        # Plot 3: Performance Metrics
+
+        # Thrust
+        bar_thrust = ax_performance[0].bar(f"Run {i}", results["Thrust"] * 1e-3, color=color)
+        ax_performance[0].set_ylabel(f"Thrust (kN)")
+        ax_performance[0].bar_label(bar_thrust, label_type='edge')
+
+        bar_tsfc = ax_performance[1].bar(f"Run {i}", results["TSFC"] * 1e6, color=color)
+        ax_performance[1].set_ylabel(f"Thrust Specific Fuel Consumption [(g/s)/kN]")
+        ax_performance[1].bar_label(bar_tsfc, label_type='edge')
+
+        fig_performance.suptitle(f"Thrust and TSFC Metrics", fontsize=12)
+
+        plt.tight_layout()
+
+    figs = {"TS Diagram": fig_TS, "Station Diagram": fig_station, "Performance Metrics": fig_performance}
 
     return figs[plot_type]
 

@@ -15,7 +15,7 @@ from PyQt5.QtWidgets import (
 )
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 import matplotlib.colors as mcolors
-from random import choice
+import random
 
 from engine import Engine
 from diffuser import InletConditions
@@ -23,6 +23,8 @@ from plot_engine import plot_engine_results
 
 
 class EngineGUI(QMainWindow):
+    random.seed(1)
+
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Turbojet Engine Analyzer")
@@ -97,7 +99,7 @@ class EngineGUI(QMainWindow):
 
         # Plot settings drop down
         self.plot_type = QComboBox()
-        self.plot_type.addItems(["TS Diagram", "Station Diagram"])
+        self.plot_type.addItems(["TS Diagram", "Station Diagram", "Performance Metrics"])
         left_panel.addWidget(self.plot_type)
 
         # Calculate Button
@@ -210,14 +212,14 @@ class EngineGUI(QMainWindow):
             results = engine.solve()
 
             color_names = list(mcolors.TABLEAU_COLORS.keys())
-            color = choice(color_names)
+            color = random.choice(color_names)
             results["color"] = color
             
             self.results_list.append(results)
 
             # Display results
             output = "=" * 50 + "\n"
-            output += "TURBOJET ENGINE RESULTS\n"
+            output += f"TURBOJET ENGINE RESULTS (RUN {len(self.results_list) - 1})\n"
             output += "=" * 50 + "\n\n"
 
             output += "Station Conditions:\n"
