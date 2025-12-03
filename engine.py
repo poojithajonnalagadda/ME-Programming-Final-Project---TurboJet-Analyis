@@ -8,15 +8,17 @@ from node import ThermoState
 import math
 
 class Engine:
-    def __init__ (self, inlet_cond, pr, T04, Qr, eta_d, eta_c, eta_b, eta_t, eta_n, mdot_air, Pa, **kwargs):
+    def __init__ (self, inlet_cond, pr, T04, Qr, eta_d, eta_c, eta_b, eta_t, eta_n, mdot_air, **kwargs):
         self.mdot_air = mdot_air
-        self.Pa = Pa
-        self.afterburner_included = kwargs.get('afterburner_included', False)
-        eta_ab = kwargs.get('eta_ab')
+        self.inlet_cond = inlet_cond
+
         self.diff = Diffuser(inlet_cond, eta = eta_d)
         self.comp = Compressor(self.diff, pressure_ratio = pr, eta=eta_c)
         self.comb = Combustor(self.comp, T04 = T04, Qr = Qr, eta_b = eta_b)
         self.turb = Turbine(self.comb, eta_t = eta_t, T03 = None, T02 = None, f = None)
+
+        self.afterburner_included = kwargs.get('afterburner_included', False)
+        eta_ab = kwargs.get('eta_ab')
         if self.afterburner_included:
             eta_ab = kwargs['eta_ab']
             Qr_ab = kwargs['Qr_ab']
@@ -53,7 +55,7 @@ class Engine:
             f_tot = f
             afterburner_station = None
         #Nozzle
-        ue , Te = self.nozz.get_outlet_conditions(self.Pa)
+        ue, Te = self.nozz.get_outlet_conditions(self.inlet_cond.p)
 
         #Turbojet Performance Characteristics
         mdot_f = f * self.mdot_air
@@ -67,16 +69,16 @@ class Engine:
         TSFC = mdot_f / Thrust
         Isp = Thrust / (mdot_f * 9.81)
         result =  {
-        "T02": stage02,
-        "T03": stage03,
-        "T04": stage04,
-        "T05": stage05,
-        "ue": ue,
-        "Te": Te,
-        "f": f,
-        "Thrust": Thrust,
-        "TSFC": TSFC,
-        "Isp": Isp
+            "T02": stage02,
+            "T03": stage03,
+            "T04": stage04,
+            "T05": stage05,
+            "ue": ue,
+            "Te": Te,
+            "f": f,
+            "Thrust": Thrust,
+            "TSFC": TSFC,
+            "Isp": Isp
         }
         if self.afterburner_included and self.afterburn is not None:
             result["T06"] = stage06

@@ -130,8 +130,7 @@ class EngineGUI(QMainWindow):
                 eta_b=eta_b,
                 eta_t=eta_t,
                 eta_n=eta_n,
-                mdot_air=mdot_air,
-                Pa=p
+                mdot_air=mdot_air
             )
             
             results = engine.solve()

@@ -12,8 +12,9 @@ def plot_engine_results(results_list : list[dict], inlet_cond, plot_type):
 
     for results in results_list:
 
-        stations = ['Inlet', 'Station 02', 'Station 03', 'Station 04', 'Station 05', 'Exit']
-        
+        stations = ['Inlet', 'Station 02', 'Station 03', 'Station 04', 'Station 05']
+        station_labels = ['0', '02', '03', '04', '05']
+
         # Extract pressure and temperature data
         pressures = np.array([
             inlet_cond.p,
@@ -21,7 +22,6 @@ def plot_engine_results(results_list : list[dict], inlet_cond, plot_type):
             results['T03'].P0,
             results['T04'].P0,
             results['T05'].P0,
-            inlet_cond.p
         ])
         
         temperatures = np.array([
@@ -30,8 +30,18 @@ def plot_engine_results(results_list : list[dict], inlet_cond, plot_type):
             results['T03'].T0,
             results['T04'].T0,
             results['T05'].T0,
-            results['Te']
         ])
+
+        if "T06" in results.keys():
+            pressures = np.append(pressures, results["T06"].P0)
+            temperatures = np.append(temperatures, results["T06"].T0)
+            stations.append("Station 06")
+            station_labels.append("06")
+
+        pressures = np.append(pressures, inlet_cond.p)
+        temperatures = np.append(temperatures, results["Te"])
+        stations.append("Exit")
+        station_labels.append("e")
 
         # Baseline entropy and properties of air
         s0 = PropsSI("S", "P", inlet_cond.p, "T", inlet_cond.T, "Air")
@@ -76,7 +86,6 @@ def plot_engine_results(results_list : list[dict], inlet_cond, plot_type):
             ax_TS.plot(valid_s, valid_T, 'o--', linewidth=2, markersize=8)
             
             # Add station labels
-            station_labels = ['0', '02', '03', '04', '05', 'e']
             for s, T, label in zip(valid_s, valid_T, station_labels):
                 ax_TS.annotate(label, (s, T), xytext=(5, 5), textcoords='offset points',
                             fontsize=9, bbox=dict(boxstyle='round,pad=0.3', 
@@ -128,13 +137,16 @@ if __name__ == "__main__":
         Qr=43e6,
         eta_d=1.0,
         eta_c=1.0,
-        eta_b=0.95,
-        eta_t=0.95,
-        eta_n=0.95,
+        eta_b=1.0,
+        eta_t=1.0,
+        eta_n=1.0,
         mdot_air=50,
-        Pa=101325
+        afterburner_included=True,
+        eta_ab=1.0,
+        Qr_ab=43e6,
+        T06=2000,
     )
     
-    results = engine.solve()
-    plot_engine_results(results, inlet)
+    results = [engine.solve()]
+    plot_engine_results(results, inlet, plot_type="TS Diagram")
     plt.show()
