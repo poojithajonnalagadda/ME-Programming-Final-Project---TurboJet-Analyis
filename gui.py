@@ -14,6 +14,8 @@ from PyQt5.QtWidgets import (
     QComboBox,
 )
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+import matplotlib.colors as mcolors
+from random import choice
 
 from engine import Engine
 from diffuser import InletConditions
@@ -98,10 +100,15 @@ class EngineGUI(QMainWindow):
         self.plot_type.addItems(["TS Diagram", "Station Diagram"])
         left_panel.addWidget(self.plot_type)
 
-        # Plot button
-        self.calc_button = QPushButton("Plot")
+        # Calculate Button
+        self.calc_button = QPushButton("Calculate")
         self.calc_button.clicked.connect(self.calculate)
         left_panel.addWidget(self.calc_button)
+
+        # Plot button
+        self.plot_button = QPushButton("Plot")
+        self.plot_button.clicked.connect(self.update_plots)
+        left_panel.addWidget(self.plot_button)
 
         self.results_list = []
 
@@ -201,6 +208,11 @@ class EngineGUI(QMainWindow):
                 )
 
             results = engine.solve()
+
+            color_names = list(mcolors.TABLEAU_COLORS.keys())
+            color = choice(color_names)
+            results["color"] = color
+            
             self.results_list.append(results)
 
             # Display results
@@ -225,8 +237,6 @@ class EngineGUI(QMainWindow):
             output += f"  Specific Impulse: {results['Isp']:.2f} s\n"
 
             self.result_text.setText(output)
-
-            self.update_plots()
 
         except Exception as e:
             self.result_text.setText(f"Error: {str(e)}")
