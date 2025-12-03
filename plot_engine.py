@@ -3,7 +3,8 @@ from CoolProp.CoolProp import PropsSI
 import numpy as np
 from node import Fluid
 
-def plot_engine_results(results_list : list[dict], inlet_cond, plot_type):
+
+def plot_engine_results(results_list: list[dict], inlet_cond, plot_type):
     """
     Plot pressure and temperature at each station, plus T-S diagram
     """
@@ -11,26 +12,29 @@ def plot_engine_results(results_list : list[dict], inlet_cond, plot_type):
     fig_TS, ax_TS = plt.subplots(1, 1, figsize=(14, 6))
 
     for results in results_list:
-
-        stations = ['Inlet', 'Station 02', 'Station 03', 'Station 04', 'Station 05']
-        station_labels = ['0', '02', '03', '04', '05']
+        stations = ["Inlet", "Station 02", "Station 03", "Station 04", "Station 05"]
+        station_labels = ["0", "02", "03", "04", "05"]
 
         # Extract pressure and temperature data
-        pressures = np.array([
-            inlet_cond.p,
-            results['T02'].P0,
-            results['T03'].P0,
-            results['T04'].P0,
-            results['T05'].P0,
-        ])
-        
-        temperatures = np.array([
-            inlet_cond.T,
-            results['T02'].T0,
-            results['T03'].T0,
-            results['T04'].T0,
-            results['T05'].T0,
-        ])
+        pressures = np.array(
+            [
+                inlet_cond.p,
+                results["T02"].P0,
+                results["T03"].P0,
+                results["T04"].P0,
+                results["T05"].P0,
+            ]
+        )
+
+        temperatures = np.array(
+            [
+                inlet_cond.T,
+                results["T02"].T0,
+                results["T03"].T0,
+                results["T04"].T0,
+                results["T05"].T0,
+            ]
+        )
 
         if "T06" in results.keys():
             pressures = np.append(pressures, results["T06"].P0)
@@ -48,87 +52,124 @@ def plot_engine_results(results_list : list[dict], inlet_cond, plot_type):
         air = Fluid(gamma=1.4, R=287)
 
         # Compute specific entropies at each station, assuming calorically perfect
-        entropies = air.cp * np.log(temperatures / inlet_cond.T) - air.R * np.log(pressures / inlet_cond.p) + s0
+        entropies = (
+            air.cp * np.log(temperatures / inlet_cond.T)
+            - air.R * np.log(pressures / inlet_cond.p)
+            + s0
+        )
 
         # Plot 1: Pressure and Temperature vs Station
-        
+
         x_pos = range(len(stations))
-        
+
         ax_twin = ax_station.twinx()
-        
-        line1 = ax_station.plot(x_pos, pressures / 1000, 'o-', color='#2E86AB', linewidth=2, 
-                        markersize=8, label='Pressure')
-        ax_station.set_xlabel('Station', fontsize=11)
-        ax_station.set_ylabel('Pressure (kPa)', color='#2E86AB', fontsize=11)
-        ax_station.tick_params(axis='y', labelcolor='#2E86AB')
+
+        line1 = ax_station.plot(
+            x_pos,
+            pressures / 1000,
+            "o-",
+            color="#2E86AB",
+            linewidth=2,
+            markersize=8,
+            label="Pressure",
+        )
+        ax_station.set_xlabel("Station", fontsize=11)
+        ax_station.set_ylabel("Pressure (kPa)", color="#2E86AB", fontsize=11)
+        ax_station.tick_params(axis="y", labelcolor="#2E86AB")
         ax_station.set_xticks(x_pos)
-        ax_station.set_xticklabels(stations, rotation=45, ha='right')
+        ax_station.set_xticklabels(stations, rotation=45, ha="right")
         ax_station.grid(True, alpha=0.3)
-        
-        line2 = ax_twin.plot(x_pos, temperatures, 's-', color='#E63946', linewidth=2,
-                            markersize=8, label='Temperature')
-        ax_twin.set_ylabel('Temperature (K)', color='#E63946', fontsize=11)
-        ax_twin.tick_params(axis='y', labelcolor='#E63946')
-        
+
+        line2 = ax_twin.plot(
+            x_pos,
+            temperatures,
+            "s-",
+            color="#E63946",
+            linewidth=2,
+            markersize=8,
+            label="Temperature",
+        )
+        ax_twin.set_ylabel("Temperature (K)", color="#E63946", fontsize=11)
+        ax_twin.tick_params(axis="y", labelcolor="#E63946")
+
         lines = line1 + line2
         labels = [l.get_label() for l in lines]
-        ax_station.legend(lines, labels, loc='upper left')
-        ax_station.set_title('Pressure and Temperature at Each Station', fontsize=12, pad=15)
-            
+        ax_station.legend(lines, labels, loc="upper left")
+        ax_station.set_title(
+            "Pressure and Temperature at Each Station", fontsize=12, pad=15
+        )
+
         plt.tight_layout()
 
         # Plot 2: T-S Diagram
 
         valid_s = [s for s in entropies if s is not None]
         valid_T = [T for s, T in zip(entropies, temperatures) if s is not None]
-        
+
         if len(valid_s) > 0:
-            ax_TS.plot(valid_s, valid_T, 'o--', linewidth=2, markersize=8)
-            
+            ax_TS.plot(valid_s, valid_T, "o--", linewidth=2, markersize=8)
+
             # Add station labels
             for s, T, label in zip(valid_s, valid_T, station_labels):
-                ax_TS.annotate(label, (s, T), xytext=(5, 5), textcoords='offset points',
-                            fontsize=9, bbox=dict(boxstyle='round,pad=0.3', 
-                            facecolor='yellow', alpha=0.3))
-            
+                ax_TS.annotate(
+                    label,
+                    (s, T),
+                    xytext=(5, 5),
+                    textcoords="offset points",
+                    fontsize=9,
+                    bbox=dict(boxstyle="round,pad=0.3", facecolor="yellow", alpha=0.3),
+                )
+
             # Add isobar lines
             s_min, s_max = min(valid_s), max(valid_s)
             s_range = s_max - s_min
-            s_plot = np.linspace(s_min - 0.1*s_range, s_max + 0.1*s_range, 100)
-            
+            s_plot = np.linspace(s_min - 0.1 * s_range, s_max + 0.1 * s_range, 100)
+
             # Draw isobars for key pressure levels
-            pressure_levels = [inlet_cond.p, results["T03"].P0, results["T05"].P0]  # [Pa]
+            pressure_levels = [
+                inlet_cond.p,
+                results["T03"].P0,
+                results["T05"].P0,
+            ]  # [Pa]
 
             delta_s = entropies - s0
 
             for p in pressure_levels:
                 delta_s = s_plot - s0
-                T_isobar = inlet_cond.T * np.exp((delta_s + air.R * np.log(p / inlet_cond.p)) / air.cp)
-                
+                T_isobar = inlet_cond.T * np.exp(
+                    (delta_s + air.R * np.log(p / inlet_cond.p)) / air.cp
+                )
+
                 if len(T_isobar) > 2:
-                    ax_TS.plot(s_plot, T_isobar, '--', color='gray', alpha=0.4, linewidth=0.8)
+                    ax_TS.plot(
+                        s_plot, T_isobar, "--", color="gray", alpha=0.4, linewidth=0.8
+                    )
                     if len(T_isobar) > 0:
-                        ax_TS.text(s_plot[-1], T_isobar[-1], f'{p / 1000:0.0f} kPa', 
-                                fontsize=7, color='gray', alpha=0.6)
-            
-            ax_TS.set_xlabel('Specific Entropy (J/kg·K)', fontsize=11)
-            ax_TS.set_ylabel('Temperature (K)', fontsize=11)
-            ax_TS.set_title('Temperature-Entropy Diagram', fontsize=12, pad=15)
+                        ax_TS.text(
+                            s_plot[-1],
+                            T_isobar[-1],
+                            f"{p / 1000:0.0f} kPa",
+                            fontsize=7,
+                            color="gray",
+                            alpha=0.6,
+                        )
+
+            ax_TS.set_xlabel("Specific Entropy (J/kg·K)", fontsize=11)
+            ax_TS.set_ylabel("Temperature (K)", fontsize=11)
+            ax_TS.set_title("Temperature-Entropy Diagram", fontsize=12, pad=15)
             ax_TS.grid(True, alpha=0.3)
-        
+
         plt.tight_layout()
 
-    figs = {
-        "TS Diagram": fig_TS,
-        "Station Diagram": fig_station
-    }
+    figs = {"TS Diagram": fig_TS, "Station Diagram": fig_station}
 
     return figs[plot_type]
+
 
 if __name__ == "__main__":
     from engine import Engine
     from diffuser import InletConditions
-    
+
     inlet = InletConditions(p=101325, T=288, u=250)
     engine = Engine(
         inlet_cond=inlet,
@@ -146,7 +187,7 @@ if __name__ == "__main__":
         Qr_ab=43e6,
         T06=2000,
     )
-    
+
     results = [engine.solve()]
     plot_engine_results(results, inlet, plot_type="TS Diagram")
     plt.show()

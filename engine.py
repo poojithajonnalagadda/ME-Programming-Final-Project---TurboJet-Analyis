@@ -7,42 +7,56 @@ from afterburner import Afterburner
 from node import ThermoState
 import math
 
+
 class Engine:
-    def __init__ (self, inlet_cond, pr, T04, Qr, eta_d, eta_c, eta_b, eta_t, eta_n, mdot_air, **kwargs):
+    def __init__(
+        self,
+        inlet_cond,
+        pr,
+        T04,
+        Qr,
+        eta_d,
+        eta_c,
+        eta_b,
+        eta_t,
+        eta_n,
+        mdot_air,
+        **kwargs,
+    ):
         self.mdot_air = mdot_air
         self.inlet_cond = inlet_cond
 
-        self.diff = Diffuser(inlet_cond, eta = eta_d)
-        self.comp = Compressor(self.diff, pressure_ratio = pr, eta=eta_c)
-        self.comb = Combustor(self.comp, T04 = T04, Qr = Qr, eta_b = eta_b)
-        self.turb = Turbine(self.comb, eta_t = eta_t, T03 = None, T02 = None, f = None)
+        self.diff = Diffuser(inlet_cond, eta=eta_d)
+        self.comp = Compressor(self.diff, pressure_ratio=pr, eta=eta_c)
+        self.comb = Combustor(self.comp, T04=T04, Qr=Qr, eta_b=eta_b)
+        self.turb = Turbine(self.comb, eta_t=eta_t, T03=None, T02=None, f=None)
 
-        self.afterburner_included = kwargs.get('afterburner_included', False)
-        eta_ab = kwargs.get('eta_ab')
+        self.afterburner_included = kwargs.get("afterburner_included", False)
+        eta_ab = kwargs.get("eta_ab")
         if self.afterburner_included:
-            eta_ab = kwargs['eta_ab']
-            Qr_ab = kwargs['Qr_ab']
-            T06 = kwargs['T06']
-            self.afterburn = Combustor(self.turb, T04 = T06, Qr = Qr_ab, eta_b = eta_ab)
-            self.nozz = Nozzle(eta_n = eta_n, fluid = self.afterburn.fluid)
+            eta_ab = kwargs["eta_ab"]
+            Qr_ab = kwargs["Qr_ab"]
+            T06 = kwargs["T06"]
+            self.afterburn = Combustor(self.turb, T04=T06, Qr=Qr_ab, eta_b=eta_ab)
+            self.nozz = Nozzle(eta_n=eta_n, fluid=self.afterburn.fluid)
         else:
             self.afterburn = None
-            self.nozz = Nozzle(eta_n = eta_n, fluid = self.turb.fluid)
-        
+            self.nozz = Nozzle(eta_n=eta_n, fluid=self.turb.fluid)
+
     def solve(self):
-        #Diffuser
+        # Diffuser
         stage02 = self.diff.get_outlet_conditions()
-        #Compressor
+        # Compressor
         stage03 = self.comp.get_outlet_conditions()
-        #Combustor
+        # Combustor
         stage04 = self.comb.get_outlet_conditions()
         f = self.comb.f
-        #Turbine
+        # Turbine
         self.turb.T03 = stage03.T0
         self.turb.T02 = stage02.T0
-        self.turb.f=f
+        self.turb.f = f
         stage05 = self.turb.get_outlet_conditions()
-        #Afterburner
+        # Afterburner
         if self.afterburner_included and self.afterburn is not None:
             stage06 = self.afterburn.get_outlet_conditions()
             f_ab = self.afterburn.f
@@ -54,21 +68,21 @@ class Engine:
             f_ab = 0.0
             f_tot = f
             afterburner_station = None
-        #Nozzle
+        # Nozzle
         ue, Te = self.nozz.get_outlet_conditions(self.inlet_cond.p)
 
-        #Turbojet Performance Characteristics
+        # Turbojet Performance Characteristics
         mdot_f = f * self.mdot_air
         u0 = self.diff.inlet.u
         if self.afterburner_included and self.afterburn is not None:
             Thrust = self.mdot_air * (1 + f_tot) * ue - self.mdot_air * u0
             mdot_f = self.mdot_air * f_tot
-        else: 
+        else:
             Thrust = self.mdot_air * (1 + f) * ue - self.mdot_air * u0
             mdot_f = self.mdot_air * f
         TSFC = mdot_f / Thrust
         Isp = Thrust / (mdot_f * 9.81)
-        result =  {
+        result = {
             "T02": stage02,
             "T03": stage03,
             "T04": stage04,
@@ -78,7 +92,7 @@ class Engine:
             "f": f,
             "Thrust": Thrust,
             "TSFC": TSFC,
-            "Isp": Isp
+            "Isp": Isp,
         }
         if self.afterburner_included and self.afterburn is not None:
             result["T06"] = stage06
@@ -86,7 +100,8 @@ class Engine:
             result["f_total"] = f_tot
         return result
 
-#Testing block
+
+# Testing block
 if __name__ == "__main__":
     inlet_condtions = InletConditions(p=101325, T=288, u=250)
 
