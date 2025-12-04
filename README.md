@@ -172,3 +172,9 @@ $$ TSFC = \frac{\dot{m}_f}{T} $$
 - NumPy
 - Matplotlib
 - PyQT
+
+## How to Utilize Turbojet Analysis Code
+- Make sure to have the packages mentioned above installed
+- Clone Github Repository
+- Run gui.py
+- Now you can enter your turbojet inputs and compare various different engine designs
